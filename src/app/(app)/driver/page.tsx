@@ -4,8 +4,10 @@ import AvailableRides from '@/components/driver/available-rides';
 import CurrentRide from '@/components/driver/current-ride';
 
 export default function DriverPage() {
-  const availableRides = MOCK_RIDES.filter(r => r.status === 'PENDING');
-  const currentRide = MOCK_RIDES.find(r => r.status === 'ASSIGNED' && r.driver?.id === 'usr_3');
+  // PENDING are unassigned, ASSIGNED are sent to a specific driver to accept/reject
+  const availableRides = MOCK_RIDES.filter(r => r.status === 'PENDING' || (r.status === 'ASSIGNED' && r.driver?.id === 'usr_3'));
+  // The current ride is one the driver has accepted and is IN_PROGRESS
+  const currentRide = MOCK_RIDES.find(r => r.status === 'IN_PROGRESS' && r.driver?.id === 'usr_3');
 
   return (
     <>

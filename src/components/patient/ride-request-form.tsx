@@ -28,9 +28,9 @@ import { MOCK_APPOINTMENT_SUGGESTIONS } from '@/lib/data';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const equipmentOptions = [
-  { id: 'wheelchair', label: 'Wheelchair' },
-  { id: 'stretcher', label: 'Stretcher/Bed' },
-  { id: 'oxygen', label: 'Oxygen Tank' },
+  { id: 'Wheelchair', label: 'Wheelchair' },
+  { id: 'Stretcher', label: 'Stretcher/Bed' },
+  { id: 'Oxygen', label: 'Oxygen Tank' },
 ];
 
 export default function RideRequestForm() {
@@ -75,7 +75,7 @@ export default function RideRequestForm() {
     e.preventDefault();
     toast({
       title: 'Ride Requested',
-      description: 'Your ride request has been submitted successfully.',
+      description: 'Your ride request has been submitted and is pending admin approval.',
     });
   }
 
@@ -147,7 +147,7 @@ export default function RideRequestForm() {
 
           <div className="grid gap-2">
             <Label>Necessary Equipment</Label>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {equipmentOptions.map((item) => (
                 <div key={item.id} className="flex items-center space-x-2">
                   <Checkbox id={item.id} />

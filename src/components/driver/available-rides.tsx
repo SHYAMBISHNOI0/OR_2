@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import type { Ride } from '@/lib/types';
-import { MapPin, Clock, User, Check } from 'lucide-react';
+import { MapPin, Clock, User, Check, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
@@ -16,9 +16,10 @@ import { useEffect, useState } from 'react';
 type RideCardProps = {
   ride: Ride;
   onAccept: (rideId: string) => void;
+  onReject: (rideId: string) => void;
 };
 
-function RideCard({ ride, onAccept }: RideCardProps) {
+function RideCard({ ride, onAccept, onReject }: RideCardProps) {
   const [appointmentTime, setAppointmentTime] = useState('');
 
   useEffect(() => {
@@ -29,6 +30,8 @@ function RideCard({ ride, onAccept }: RideCardProps) {
       })
     );
   }, [ride.appointmentTime]);
+
+  const isAssigned = ride.status === 'ASSIGNED';
 
   return (
     <Card className="bg-background">
@@ -56,14 +59,25 @@ function RideCard({ ride, onAccept }: RideCardProps) {
           </div>
         )}
       </CardContent>
-      <CardFooter>
-        <Button
-          size="sm"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => onAccept(ride.id)}
-        >
-          <Check className="mr-2 h-4 w-4" /> Accept Ride
-        </Button>
+      <CardFooter className="grid grid-cols-2 gap-2">
+        {isAssigned ? (
+            <>
+                <Button size="sm" variant="outline" onClick={() => onReject(ride.id)}>
+                    <X className="mr-2 h-4 w-4" /> Reject
+                </Button>
+                <Button size="sm" onClick={() => onAccept(ride.id)}>
+                    <Check className="mr-2 h-4 w-4" /> Accept
+                </Button>
+            </>
+        ) : (
+            <Button
+                size="sm"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 col-span-2"
+                onClick={() => onAccept(ride.id)}
+                >
+                <Check className="mr-2 h-4 w-4" /> Accept Ride
+            </Button>
+        )}
       </CardFooter>
     </Card>
   );
@@ -82,6 +96,14 @@ export default function AvailableRides({ rides }: AvailableRidesProps) {
       description: `You have accepted ride ${rideId}. See details for your trip.`,
     });
   };
+  
+  const handleReject = (rideId: string) => {
+    toast({
+      variant: 'destructive',
+      title: 'Ride Rejected',
+      description: `You have rejected ride ${rideId}. It will be returned to the pending queue.`,
+    });
+  };
 
   return (
     <Card>
@@ -92,7 +114,7 @@ export default function AvailableRides({ rides }: AvailableRidesProps) {
       <CardContent className="space-y-4">
         {rides.length > 0 ? (
           rides.map((ride) => (
-            <RideCard key={ride.id} ride={ride} onAccept={handleAccept} />
+            <RideCard key={ride.id} ride={ride} onAccept={handleAccept} onReject={handleReject} />
           ))
         ) : (
           <p className="text-sm text-muted-foreground p-4 text-center">

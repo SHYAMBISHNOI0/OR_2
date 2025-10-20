@@ -21,7 +21,7 @@ export type Ride = {
   status: RideStatus;
   driver?: User;
   specialNeeds?: string[];
-  equipment?: string[];
+  equipment?: ('Wheelchair' | 'Stretcher' | 'Oxygen')[];
   distance?: number;
   createdAt: Date;
 };
