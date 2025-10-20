@@ -34,7 +34,7 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
   const { currentUser, addRequest } = useOrchestrate();
   const [selectedEquipment, setSelectedEquipment] = useState<Set<EquipmentType>>(new Set());
   const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
-  const [distance, setDistance] = useState<number>(0);
+  const [distance, setDistance] = useState<number | ''>('');
   const [comments, setComments] = useState('');
 
   const handleCheckboxChange = (type: EquipmentType, checked: boolean) => {
@@ -59,7 +59,8 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
         })
         return;
     }
-    if (distance <= 0) {
+    const numericDistance = Number(distance);
+    if (distance === '' || numericDistance <= 0) {
         toast({
             variant: 'destructive',
             title: 'Invalid Distance',
@@ -72,7 +73,7 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
         patientId: currentUser.id,
         equipmentType: Array.from(selectedEquipment),
         priority,
-        distanceFromHospital: distance,
+        distanceFromHospital: numericDistance,
         comments,
     });
 
@@ -120,7 +121,7 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
                     id="distance"
                     type="number"
                     value={distance}
-                    onChange={(e) => setDistance(parseFloat(e.target.value))}
+                    onChange={(e) => setDistance(e.target.value === '' ? '' : parseFloat(e.target.value))}
                     placeholder="e.g., 10.5"
                     required
                 />
