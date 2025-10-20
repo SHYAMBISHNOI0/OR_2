@@ -21,10 +21,11 @@ import {
 } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { summarizeRideHistory } from '@/ai/flows/summarize-ride-history';
-import { rideHistoryForSummary, MOCK_RIDES } from '@/lib/data';
+import { rideHistoryForSummary, MOCK_RIDES, MOCK_SUMMARY } from '@/lib/data';
 import { useEffect, useState } from 'react';
 import type { SummarizeRideHistoryOutput } from '@/ai/flows/summarize-ride-history';
 import { Button } from '../ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const chartData = [
   { month: 'January', rides: 186 },
@@ -45,6 +46,7 @@ const chartConfig = {
 export default function AnalyticsTab() {
   const [summary, setSummary] = useState<SummarizeRideHistoryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleGenerateSummary = async () => {
     setIsLoading(true);
@@ -53,6 +55,11 @@ export default function AnalyticsTab() {
       setSummary(result);
     } catch (error) {
       console.error("Failed to generate summary", error);
+      setSummary(MOCK_SUMMARY);
+      toast({
+        title: 'Using mock summary',
+        description: 'AI summary is mocked for this demo.',
+      });
     } finally {
       setIsLoading(false);
     }

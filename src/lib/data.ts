@@ -92,3 +92,9 @@ export const MOCK_APPOINTMENT_SUGGESTIONS = {
   ],
   reasoning: 'These times are suggested based on low predicted traffic and high driver availability in your area. The 10:00 AM slot is prioritized for optimal travel conditions.'
 };
+
+export const MOCK_SUMMARY = {
+  summary: "The patient has a consistent history of rides, primarily to General Hospital. There's a slight fluctuation in cost, which might be due to traffic or time of day.",
+  commonDestinations: "General Hospital is the most frequent destination, with one ride to City Clinic.",
+  potentialSavings: "Consider scheduling appointments during off-peak hours (like mid-morning) to potentially reduce costs. Also, check if there are any multi-ride discounts available with MediRoute."
+};
