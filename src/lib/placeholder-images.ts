@@ -1,4 +1,4 @@
-import data from './placeholder-images.json';
+import type { StaticImageData } from 'next/image';
 
 export type ImagePlaceholder = {
   id: string;
@@ -7,4 +7,6 @@ export type ImagePlaceholder = {
   imageHint: string;
 };
 
-export const PlaceHolderImages: ImagePlaceholder[] = data.placeholderImages;
+import placeholderData from './placeholder-images.json';
+
+export const placeholderImages: ImagePlaceholder[] = placeholderData.placeholderImages;

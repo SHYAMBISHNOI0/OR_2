@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "login-hero",
+      "description": "A scenic, empty rural road winding through hills at sunrise.",
+      "imageUrl": "https://images.unsplash.com/photo-1662158745441-e051ff378304?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxydXJhbCUyMHJvYWR8ZW58MHx8fHwxNzYwOTY1MDI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rural road"
+    },
+    {
+      "id": "map-background",
+      "description": "A stylized, abstract map of a city.",
+      "imageUrl": "https://images.unsplash.com/photo-1718498576124-23f393161811?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMG1hcHxlbnwwfHx8fDE3NjA4NTU5NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract map"
+    },
+    {
+      "id": "map-route-1",
+      "description": "A map showing a route from a suburban area to a downtown hospital.",
+      "imageUrl": "https://images.unsplash.com/photo-1694580511884-7de02841ac2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFwJTIwcm91dGV8ZW58MHx8fHwxNzYwODU0OTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "map route"
+    },
+    {
+      "id": "map-fleet",
+      "description": "A map showing multiple vehicle icons scattered across a city grid.",
+      "imageUrl": "https://images.unsplash.com/photo-1634208716964-088dd7a35394?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYXAlMjB2ZWhpY2xlc3xlbnwwfHx8fDE3NjA5NjUwMjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "map vehicles"
+    }
+  ]
 }
