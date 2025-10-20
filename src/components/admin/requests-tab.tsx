@@ -44,7 +44,7 @@ export default function RequestsTab() {
         toast({
             variant: 'destructive',
             title: 'Optimization Failed',
-            description: result.error,
+            description: result.error || 'Could not assign all requests. Check equipment availability.',
         });
       }
     }, 1500);
@@ -63,8 +63,8 @@ export default function RequestsTab() {
         <div>
           <h3 className="text-lg font-medium mb-2">Pending Requests ({pendingRequests.length})</h3>
           <div className="border rounded-lg">
-             <div className="grid grid-cols-5 gap-4 p-4 font-semibold border-b">
-                <div>Patient</div>
+             <div className="grid grid-cols-6 gap-4 p-4 font-semibold border-b bg-muted/50">
+                <div className="col-span-2">Patient</div>
                 <div>Requested At</div>
                 <div>Equipment</div>
                 <div>Priority</div>
@@ -77,7 +77,7 @@ export default function RequestsTab() {
                 ))}
                 </div>
             ) : (
-                <p className="p-4 text-center text-muted-foreground">No pending requests to optimize.</p>
+                <p className="p-4 text-center text-muted-foreground">No pending requests.</p>
             )}
           </div>
         </div>
@@ -129,8 +129,11 @@ function RequestRow({ req }: { req: EquipmentRequest }) {
 
 
     return (
-        <div className="grid grid-cols-5 gap-4 p-4 text-sm items-center">
-            <div>{req.patient.name}</div>
+        <div className="grid grid-cols-6 gap-4 p-4 text-sm items-center">
+            <div className="col-span-2">
+                <div>{req.patient.name}</div>
+                <div className="text-xs text-muted-foreground">{req.distanceFromHospital} km away</div>
+            </div>
             <div>{format(req.createdAt, 'MMM d, h:mm a')}</div>
             <div>
                 <div className="flex flex-wrap gap-1">

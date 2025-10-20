@@ -14,6 +14,7 @@ import {
     SelectValue,
   } from '../ui/select';
 import { useOrchestrate } from '@/context/orchestrate-context';
+import { Input } from '../ui/input';
 
 const equipmentOptions: { id: EquipmentType, label: string }[] = [
   { id: 'Wheelchair', label: 'Wheelchair' },
@@ -33,6 +34,7 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
   const { currentUser, addRequest } = useOrchestrate();
   const [selectedEquipment, setSelectedEquipment] = useState<Set<EquipmentType>>(new Set());
   const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
+  const [distance, setDistance] = useState<number>(0);
   const [comments, setComments] = useState('');
 
   const handleCheckboxChange = (type: EquipmentType, checked: boolean) => {
@@ -57,11 +59,20 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
         })
         return;
     }
+    if (distance <= 0) {
+        toast({
+            variant: 'destructive',
+            title: 'Invalid Distance',
+            description: 'Please enter a valid distance from the hospital.'
+        })
+        return;
+    }
 
     addRequest({
         patientId: currentUser.id,
         equipmentType: Array.from(selectedEquipment),
         priority,
+        distanceFromHospital: distance,
         comments,
     });
 
@@ -75,32 +86,45 @@ export default function EquipmentRequestForm({ onFormSubmit }: EquipmentRequestF
   return (
     <form onSubmit={handleFormSubmit} className="grid gap-6">
         <div className="grid gap-2">
-        <Label>Necessary Equipment / Services</Label>
-        <div className="flex flex-col space-y-2">
-            {equipmentOptions.map((item) => (
-            <div key={item.id} className="flex items-center space-x-2">
-                <Checkbox 
-                    id={item.id} 
-                    onCheckedChange={(checked) => handleCheckboxChange(item.id, !!checked)}
-                />
-                <Label htmlFor={item.id} className="font-normal">{item.label}</Label>
+            <Label>Necessary Equipment / Services</Label>
+            <div className="grid grid-cols-2 gap-2">
+                {equipmentOptions.map((item) => (
+                <div key={item.id} className="flex items-center space-x-2">
+                    <Checkbox 
+                        id={item.id} 
+                        onCheckedChange={(checked) => handleCheckboxChange(item.id, !!checked)}
+                    />
+                    <Label htmlFor={item.id} className="font-normal">{item.label}</Label>
+                </div>
+                ))}
             </div>
-            ))}
-        </div>
         </div>
 
-        <div className="grid gap-2">
-        <Label htmlFor="priority">Priority</Label>
-        <Select value={priority} onValueChange={(v: 'High' | 'Medium' | 'Low') => setPriority(v)}>
-            <SelectTrigger>
-                <SelectValue placeholder="Select priority level..." />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="High">High</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Low">Low</SelectItem>
-            </SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select value={priority} onValueChange={(v: 'High' | 'Medium' | 'Low') => setPriority(v)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select priority level..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+             <div className="grid gap-2">
+                <Label htmlFor="distance">Distance from Hospital (km)</Label>
+                <Input
+                    id="distance"
+                    type="number"
+                    value={distance}
+                    onChange={(e) => setDistance(parseFloat(e.target.value))}
+                    placeholder="e.g., 10.5"
+                    required
+                />
+            </div>
         </div>
 
         <div className="grid gap-2">

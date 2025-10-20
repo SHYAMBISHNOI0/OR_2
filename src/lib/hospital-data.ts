@@ -17,13 +17,15 @@ for (let i = 1; i <= 50; i++) {
     equipment.push({ id: `wheelchair${i}`, label: `Wheelchair ${i}`, type: 'Wheelchair', status: 'available', assignedTo: null });
 }
 
-// Beds & Rooms
-for (let i = 1; i <= 50; i++) {
-    equipment.push({ id: `bed${i}`, label: `Bed ${i}`, type: 'Bed', status: 'available', assignedTo: null });
-}
+// Rooms with Beds
 for (let roomNum = 1; roomNum <= 5; roomNum++) {
-    equipment.push({ id: `room${roomNum}`, label: `Room ${roomNum}`, type: 'Room', status: 'available', assignedTo: null });
+    for (let bedNum = 1; bedNum <= 10; bedNum++) {
+        equipment.push({ id: `room${roomNum}_bed${bedNum}`, label: `Room ${roomNum} - Bed ${bedNum}`, type: 'Bed', status: 'available', assignedTo: null });
+    }
 }
+
+// Standalone Beds (if any, adjust as needed) - let's assume all beds are in rooms for now.
+// For a total of 50 beds, we have 5 rooms * 10 beds/room = 50 beds.
 
 // Ambulances
 for (let i = 1; i <= 10; i++) {
@@ -50,6 +52,7 @@ const requests: EquipmentRequest[] = [
         status: 'Pending',
         createdAt: new Date(new Date().getTime() - 2 * 60 * 60 * 1000), // 2 hours ago
         priority: 'High',
+        distanceFromHospital: 15.2,
     },
     {
         id: 'req_2',
@@ -59,6 +62,7 @@ const requests: EquipmentRequest[] = [
         status: 'Pending',
         createdAt: new Date(new Date().getTime() - 1 * 60 * 60 * 1000), // 1 hour ago
         priority: 'Medium',
+        distanceFromHospital: 5.5,
     },
     {
         id: 'req_3',
@@ -70,6 +74,7 @@ const requests: EquipmentRequest[] = [
         fulfilledBy: ['ambulance3'],
         fulfilledAt: new Date(new Date().getTime() - 4 * 60 * 60 * 1000),
         priority: 'High',
+        distanceFromHospital: 25.0,
     },
     {
         id: 'req_4',
@@ -81,6 +86,7 @@ const requests: EquipmentRequest[] = [
         fulfilledBy: ['doctor1'],
         fulfilledAt: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000 + 1 * 60 * 60 * 1000),
         priority: 'Low',
+        distanceFromHospital: 15.2,
     }
 ];
 
@@ -95,8 +101,10 @@ if (assignedReq && assignedReq.fulfilledBy) {
 }
 const completedReq = requests.find(r => r.id === 'req_4');
 if (completedReq && completedReq.fulfilledBy) {
-    // Note: In a real system, 'doctor1' might become available again, but for mock data, we leave it.
-    // This can be adjusted if we want to show it as available.
+    // Note: In a real system, 'doctor1' might become available again after a completed task.
+    // For this mock data, we'll assume it's still occupied to show variety, but a real implementation would free it up.
+    const equip = equipment.find(e => e.id === completedReq.fulfilledBy![0]);
+    // if (equip) equip.status = 'occupied';
 }
 
 

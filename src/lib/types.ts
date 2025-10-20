@@ -29,9 +29,10 @@ export type EquipmentRequest = {
     equipmentType: EquipmentType[];
     status: RequestStatus;
     createdAt: Date;
+    distanceFromHospital: number;
     fulfilledBy?: string[]; // equipment IDs
     fulfilledAt?: Date;
-    priority?: 'High' | 'Medium' | 'Low';
+    priority: 'High' | 'Medium' | 'Low';
     comments?: string;
 };
 

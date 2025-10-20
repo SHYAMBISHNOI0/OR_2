@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { getInitialState } from '@/lib/hospital-data';
-import type { User, Equipment, EquipmentRequest, Assignment, EquipmentType } from '@/lib/types';
+import type { User, Equipment, EquipmentRequest, Assignment } from '@/lib/types';
 
 interface OrchestrateState {
   users: User[];
@@ -28,9 +28,10 @@ const OrchestrateContext = createContext<
 export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<OrchestrateState>(() => {
     const initialState = getInitialState();
+    // For demo purposes, automatically log in the admin user.
     return {
       ...initialState,
-      currentUser: null,
+      currentUser: null, // Start with no user logged in
     };
   });
 
@@ -73,6 +74,7 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
         patient,
         status: 'Pending',
         createdAt: new Date(),
+        priority: requestData.priority || 'Medium',
       };
       return {
         ...prev,
@@ -98,39 +100,39 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
             const request = newRequests[requestIndex];
             const assignedEquipmentIds: string[] = [];
             let canFulfill = true;
+            let tempEquipmentState = [...newEquipment]; // Create a temporary state for this request's assignments
 
             for (const type of request.equipmentType) {
-                const availableItemIndex = newEquipment.findIndex(e => e.type === type && e.status === 'available');
+                const availableItemIndex = tempEquipmentState.findIndex(e => e.type === type && e.status === 'available');
                 if (availableItemIndex !== -1) {
-                    assignedEquipmentIds.push(newEquipment[availableItemIndex].id);
-                    // Temporarily mark as occupied to avoid re-assignment in the same run
-                    newEquipment[availableItemIndex] = { ...newEquipment[availableItemIndex], status: 'occupied', assignedTo: request.patientId };
+                    const assignedId = tempEquipmentState[availableItemIndex].id;
+                    assignedEquipmentIds.push(assignedId);
+                    // Temporarily mark as occupied to avoid re-assignment in the same run for the same request
+                    tempEquipmentState[availableItemIndex] = { ...tempEquipmentState[availableItemIndex], status: 'occupied', assignedTo: request.patientId };
                 } else {
                     canFulfill = false;
                     optimizationError = `Not enough ${type} available for request ${request.id.slice(0, 6)}.`;
-                    // Revert changes for this request
-                    assignedEquipmentIds.forEach(assignedId => {
-                        const revertIndex = newEquipment.findIndex(e => e.id === assignedId);
-                        if (revertIndex !== -1) {
-                           newEquipment[revertIndex] = { ...newEquipment[revertIndex], status: 'available', assignedTo: null };
-                        }
-                    });
-                    break; 
+                    // No need to revert since we are using a temporary state `tempEquipmentState`
+                    break;
                 }
             }
 
             if (canFulfill) {
+                newEquipment = tempEquipmentState; // Commit the changes if successful
                 newRequests[requestIndex] = { ...request, status: 'Assigned', fulfilledBy: assignedEquipmentIds, fulfilledAt: new Date() };
-                newAssignments.push({
-                    id: `asg_${newAssignments.length + 1}`,
-                    requestId: request.id,
-                    patientId: request.patientId,
-                    equipmentIds: assignedEquipmentIds,
-                    assignedAt: new Date(),
-                });
+                
+                const existingAssignmentIndex = newAssignments.findIndex(a => a.requestId === request.id);
+                if (existingAssignmentIndex === -1) {
+                     newAssignments.push({
+                        id: `asg_${prev.assignments.length + assignedCount + 1}`,
+                        requestId: request.id,
+                        patientId: request.patientId,
+                        equipmentIds: assignedEquipmentIds,
+                        assignedAt: new Date(),
+                    });
+                }
                 assignedCount++;
             } else {
-                // If we are processing a single request and it fails, we stop and report error.
                 if (requestId) break;
             }
         }
@@ -148,37 +150,36 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
 
   const dischargePatient = (patientId: string) => {
     setState((prev) => {
-      const newAssignments = [...prev.assignments];
-      const newEquipment = [...prev.equipment];
-      const newRequests = [...prev.requests];
+      // Find all active assignments for the patient and mark them as discharged
+      const updatedAssignments = prev.assignments.map(a => 
+        a.patientId === patientId && !a.dischargedAt ? { ...a, dischargedAt: new Date() } : a
+      );
 
-      const assignmentsToDischarge = newAssignments.filter(a => a.patientId === patientId && !a.dischargedAt);
-      
-      for (const assignment of assignmentsToDischarge) {
-        // Free up equipment
-        for (const equipId of assignment.equipmentIds) {
-          const equipIndex = newEquipment.findIndex(e => e.id === equipId);
-          if (equipIndex !== -1) {
-            newEquipment[equipIndex] = { ...newEquipment[equipIndex], status: 'available', assignedTo: null };
-          }
-        }
+      // Get the IDs of equipment to be freed
+      const equipmentIdsToFree = prev.assignments
+        .filter(a => a.patientId === patientId && !a.dischargedAt)
+        .flatMap(a => a.equipmentIds);
+        
+      // Free up the equipment
+      const newEquipment = prev.equipment.map(e => 
+        equipmentIdsToFree.includes(e.id) ? { ...e, status: 'available', assignedTo: null } : e
+      );
 
-        // Mark assignment as discharged
-        const assignmentIndex = newAssignments.findIndex(a => a.id === assignment.id);
-        if(assignmentIndex !== -1) {
-            newAssignments[assignmentIndex] = { ...assignment, dischargedAt: new Date() };
-        }
+      // Mark original requests as completed
+      const requestIdsToComplete = prev.assignments
+          .filter(a => a.patientId === patientId && !a.dischargedAt)
+          .map(a => a.requestId);
 
-        // Mark original request as completed
-        const requestIndex = newRequests.findIndex(r => r.id === assignment.requestId);
-        if (requestIndex !== -1) {
-          newRequests[requestIndex] = { ...newRequests[requestIndex], status: 'Completed' };
-        }
-      }
+      const newRequests = prev.requests.map(r => 
+        requestIdsToComplete.includes(r.id) ? { ...r, status: 'Completed' } : r
+      );
+
+      // Filter out discharged assignments from the main assignments list being displayed
+      const activeAssignments = updatedAssignments.filter(a => !a.dischargedAt);
 
       return {
         ...prev,
-        assignments: newAssignments,
+        assignments: activeAssignments,
         equipment: newEquipment,
         requests: newRequests,
       };
