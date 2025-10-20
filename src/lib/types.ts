@@ -1,4 +1,4 @@
-export type UserRole = 'patient' | 'driver' | 'admin';
+export type UserRole = 'patient' | 'admin';
 
 export type User = {
   id: string;
@@ -10,29 +10,38 @@ export type User = {
   status?: 'active' | 'inactive';
 };
 
-export type RideStatus = 'PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type EquipmentType = 'Wheelchair' | 'Bed' | 'Room' | 'Ambulance' | 'Nurse' | 'Doctor';
 
-export type Ride = {
-  id: string;
-  patient: User;
-  pickupLocation: string;
-  dropoffLocation: string;
-  appointmentTime: Date;
-  status: RideStatus;
-  driver?: User;
-  specialNeeds?: string[];
-  equipment?: ('Wheelchair' | 'Stretcher' | 'Oxygen')[];
-  distance?: number;
-  createdAt: Date;
+export type Equipment = {
+    id: string;
+    label: string;
+    type: EquipmentType;
+    status: 'available' | 'occupied';
+    assignedTo: string | null; // patientId
 };
 
-export type Vehicle = {
-  id: string;
-  driverId: string;
-  type: 'Sedan' | 'SUV' | 'Van (Wheelchair)';
-  capacity: number;
-  currentLocation: {
-    lat: number;
-    lng: number;
-  };
+export type RequestStatus = 'Pending' | 'Assigned' | 'Completed';
+
+export type EquipmentRequest = {
+    id: string;
+    patientId: string;
+    patient: User;
+    equipmentType: EquipmentType[];
+    status: RequestStatus;
+    createdAt: Date;
+    fulfilledBy?: string[]; // equipment IDs
+    fulfilledAt?: Date;
+    timeWindow?: {
+        start: Date;
+        end: Date;
+    },
+    priority?: 'High' | 'Medium' | 'Low';
+    comments?: string;
+};
+
+export type Assignment = {
+    id: string;
+    patientId: string;
+    equipmentIds: string[];
+    assignedAt: Date;
 };

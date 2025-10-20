@@ -4,11 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Bell,
-  Car,
-  Home,
-  Package2,
+  Hospital,
   PieChart,
-  Stethoscope,
   Users,
 } from 'lucide-react';
 
@@ -20,27 +17,25 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
-import { MOCK_RIDES } from '@/lib/data';
+import { MOCK_REQUESTS } from '@/lib/hospital-data';
 
 const navItems = [
   { href: '/patient', icon: Users, label: 'Patient View' },
-  { href: '/driver', icon: Car, label: 'Driver View' },
   { href: '/admin', icon: PieChart, label: 'Admin View' },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const pendingRidesCount = MOCK_RIDES.filter(r => r.status === 'PENDING').length;
+  const pendingRequestsCount = MOCK_REQUESTS.filter(r => r.status === 'Pending').length;
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Stethoscope className="h-6 w-6 text-primary" />
-            <span className="">MediRoute</span>
+            <Hospital className="h-6 w-6 text-primary" />
+            <span className="">Orchestrate</span>
           </Link>
           <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
             <Bell className="h-4 w-4" />
@@ -69,7 +64,7 @@ export function AppSidebar() {
             <CardHeader className="p-2 pt-0 md:p-4">
               <CardTitle>Need Assistance?</CardTitle>
               <CardDescription>
-                Contact support for help with scheduling or technical issues.
+                Contact support for help with the system or technical issues.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-2 pt-0 md:p-4 md:pt-0">

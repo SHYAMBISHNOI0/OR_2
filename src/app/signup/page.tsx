@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Stethoscope } from 'lucide-react';
+import { Hospital } from 'lucide-react';
 import SignupForm from '@/components/auth/signup-form';
 import Image from 'next/image';
 import { placeholderImages } from '@/lib/placeholder-images';
@@ -24,8 +24,8 @@ export default function SignupPage() {
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
-              <Stethoscope className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold">MediRoute</h1>
+              <Hospital className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold">Orchestrate</h1>
             </div>
             <h1 className="text-3xl font-bold">Create an account</h1>
             <p className="text-balance text-muted-foreground">

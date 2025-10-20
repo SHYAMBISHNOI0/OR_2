@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { UserRole } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Stethoscope } from 'lucide-react';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -33,7 +32,7 @@ export default function LoginForm() {
           type="email"
           placeholder="m@example.com"
           required
-          defaultValue="user@mediroute.com"
+          defaultValue="patient@orchestrate.com"
         />
       </div>
       <div className="grid gap-2">
@@ -46,7 +45,7 @@ export default function LoginForm() {
         <Label>Log in as</Label>
         <RadioGroup
           defaultValue="patient"
-          className="grid grid-cols-3 gap-4"
+          className="grid grid-cols-2 gap-4"
           onValueChange={(value: UserRole) => setRole(value)}
           value={role}
         >
@@ -57,15 +56,6 @@ export default function LoginForm() {
               className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
             >
               Patient
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="driver" id="driver" className="peer sr-only" />
-            <Label
-              htmlFor="driver"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              Driver
             </Label>
           </div>
           <div>

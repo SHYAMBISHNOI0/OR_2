@@ -1,9 +1,11 @@
 'use client';
 import {
-  Car,
-  Clock,
+  Activity,
+  ClipboardList,
   Users,
   CheckCircle,
+  HelpCircle,
+  PieChart,
 } from 'lucide-react';
 import { StatCard } from '@/components/shared/stat-card';
 import {
@@ -19,140 +21,168 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
-import { summarizeRideHistory } from '@/ai/flows/summarize-ride-history';
-import { rideHistoryForSummary, MOCK_RIDES, MOCK_SUMMARY } from '@/lib/data';
-import { useEffect, useState } from 'react';
-import type { SummarizeRideHistoryOutput } from '@/ai/flows/summarize-ride-history';
-import { Button } from '../ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { Pie, PieLabel, Cell } from 'recharts';
+import { MOCK_EQUIPMENT, MOCK_REQUESTS, MOCK_USERS } from '@/lib/hospital-data';
 
-const chartData = [
-  { month: 'January', rides: 186 },
-  { month: 'February', rides: 305 },
-  { month: 'March', rides: 237 },
-  { month: 'April', rides: 273 },
-  { month: 'May', rides: 209 },
-  { month: 'June', rides: 214 },
+const equipmentStatusData = [
+  { name: 'Available', value: MOCK_EQUIPMENT.filter(e => e.status === 'available').length, fill: 'var(--color-available)' },
+  { name: 'Occupied', value: MOCK_EQUIPMENT.filter(e => e.status === 'occupied').length, fill: 'var(--color-occupied)' },
 ];
 
-const chartConfig = {
-  rides: {
-    label: 'Rides',
-    color: 'hsl(var(--primary))',
+const equipmentChartConfig = {
+  value: {
+    label: 'Equipment',
+  },
+  available: {
+    label: 'Available',
+    color: 'hsl(var(--chart-1))',
+  },
+  occupied: {
+    label: 'Occupied',
+    color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig;
 
-export default function AnalyticsTab() {
-  const [summary, setSummary] = useState<SummarizeRideHistoryOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleGenerateSummary = async () => {
-    setIsLoading(true);
-    try {
-      const result = await summarizeRideHistory({ rideHistory: rideHistoryForSummary });
-      setSummary(result);
-    } catch (error) {
-      console.error("Failed to generate summary", error);
-      setSummary(MOCK_SUMMARY);
-      toast({
-        title: 'Using mock summary',
-        description: 'AI summary is mocked for this demo.',
-      });
-    } finally {
-      setIsLoading(false);
+const requestStatusData = [
+    { name: 'Pending', value: MOCK_REQUESTS.filter(e => e.status === 'Pending').length, fill: 'var(--color-pending)' },
+    { name: 'Assigned', value: MOCK_REQUESTS.filter(e => e.status === 'Assigned').length, fill: 'var(--color-assigned)' },
+    { name: 'Completed', value: MOCK_REQUESTS.filter(e => e.status === 'Completed').length, fill: 'var(--color-completed)' },
+  ];
+  
+  const requestChartConfig = {
+    value: {
+      label: 'Requests',
+    },
+    pending: {
+      label: 'Pending',
+      color: 'hsl(var(--chart-1))',
+    },
+    assigned: {
+      label: 'Assigned',
+      color: 'hsl(var(--chart-2))',
+    },
+    completed: {
+        label: 'Completed',
+        color: 'hsl(var(--chart-3))',
     }
-  }
+  } satisfies ChartConfig;
 
+export default function AnalyticsTab() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Rides"
-          value={MOCK_RIDES.length.toString()}
-          description="Total rides completed and scheduled"
-          icon={Car}
+          title="Total Equipment"
+          value={MOCK_EQUIPMENT.length.toString()}
+          description="All equipment items in inventory"
+          icon={ClipboardList}
         />
         <StatCard
-          title="Active Drivers"
-          value="2"
-          description="Drivers currently available"
+          title="Active Patients"
+          value={MOCK_USERS.filter(u => u.role === 'patient').length.toString()}
+          description="Patients currently registered"
           icon={Users}
         />
         <StatCard
-          title="Avg. Wait Time"
-          value="12m"
-          description="Average patient wait time"
-          icon={Clock}
+          title="Pending Requests"
+          value={MOCK_REQUESTS.filter(r => r.status === 'Pending').length.toString()}
+          description="Equipment requests awaiting action"
+          icon={HelpCircle}
         />
         <StatCard
-          title="Completion Rate"
-          value="98.2%"
-          description="Percentage of completed rides"
+          title="Completed Requests"
+          value={MOCK_REQUESTS.filter(r => r.status === 'Completed').length.toString()}
+          description="Fulfilled and discharged requests"
           icon={CheckCircle}
         />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-4 lg:col-span-4">
           <CardHeader>
-            <CardTitle>Rides Overview</CardTitle>
-            <CardDescription>Monthly ride volume over the last 6 months.</CardDescription>
+            <CardTitle>Equipment Status</CardTitle>
+            <CardDescription>Live overview of all equipment inventory.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
-              <BarChart data={chartData}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                />
-                <YAxis />
+            <ChartContainer
+              config={equipmentChartConfig}
+              className="mx-auto aspect-square max-h-[350px]"
+            >
+              <RechartsPrimitive.PieChart>
                 <ChartTooltip
                   cursor={false}
-                  content={<ChartTooltipContent indicator="dot" />}
+                  content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar dataKey="rides" fill="var(--color-rides)" radius={4} />
-              </BarChart>
+                <Pie
+                  data={equipmentStatusData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  strokeWidth={5}
+                >
+                   <PieLabel
+                    content={({viewBox}) => {
+                      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                        return (
+                          <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-3xl font-bold"
+                            >
+                              {MOCK_EQUIPMENT.length.toLocaleString()}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 24}
+                              className="fill-muted-foreground"
+                            >
+                              Items
+                            </tspan>
+                          </text>
+                        )
+                      }
+                    }}
+                  />
+                </Pie>
+              </RechartsPrimitive.PieChart>
             </ChartContainer>
           </CardContent>
         </Card>
         <Card className="col-span-4 lg:col-span-3">
-          <CardHeader>
-            <CardTitle>AI-Powered Ride Analysis</CardTitle>
-            <CardDescription>
-              Generate an AI summary of ride history to find patterns.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {summary ? (
-              <div className="space-y-4 text-sm">
-                <div>
-                  <h4 className="font-semibold">Summary</h4>
-                  <p className="text-muted-foreground">{summary.summary}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Common Destinations</h4>
-                  <p className="text-muted-foreground">{summary.commonDestinations}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Potential Savings</h4>
-                  <p className="text-muted-foreground">{summary.potentialSavings}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
-                <p className="text-muted-foreground">Click below to generate summary.</p>
-              </div>
-            )}
-            <Button onClick={handleGenerateSummary} disabled={isLoading} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">
-              {isLoading ? 'Generating...' : 'Generate Ride Summary'}
-            </Button>
-          </CardContent>
+            <CardHeader>
+                <CardTitle>Request Status</CardTitle>
+                <CardDescription>Breakdown of patient request statuses.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer
+                    config={requestChartConfig}
+                    className="mx-auto aspect-square max-h-[350px]"
+                >
+                    <RechartsPrimitive.PieChart>
+                    <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                        data={requestStatusData}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={60}
+                        strokeWidth={5}
+                    >
+                        {requestStatusData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                    </Pie>
+                    </RechartsPrimitive.PieChart>
+                </ChartContainer>
+            </CardContent>
         </Card>
       </div>
     </div>
   );
 }
+
+// RechartsPrimitive needs to be defined for the PieChart to work.
+// It's a workaround for the current setup.
+import * as RechartsPrimitive from 'recharts';

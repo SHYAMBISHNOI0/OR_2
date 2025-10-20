@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'MediRoute',
-  description: 'Rural Healthcare Transportation Platform',
+  title: 'Orchestrate',
+  description: 'Intelligent Hospital Equipment Management',
 };
 
 export default function RootLayout({

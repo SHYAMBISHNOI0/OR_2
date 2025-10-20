@@ -1,32 +1,34 @@
 import { PageHeader } from '@/components/shared/page-header';
-import RideRequestForm from '@/components/patient/ride-request-form';
-import RideList from '@/components/patient/ride-list';
+import EquipmentRequestForm from '@/components/patient/equipment-request-form';
+import RequestList from '@/components/patient/request-list';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { MOCK_RIDES } from '@/lib/data';
+import { MOCK_REQUESTS } from '@/lib/hospital-data';
 
 export default function PatientPage() {
-  const upcomingRides = MOCK_RIDES.filter(r => r.status === 'ASSIGNED' || r.status === 'PENDING');
-  const pastRides = MOCK_RIDES.filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED');
+  const pendingRequests = MOCK_REQUESTS.filter(r => r.status === 'Pending');
+  const activeRequests = MOCK_REQUESTS.filter(r => r.status === 'Assigned');
+  const completedRequests = MOCK_REQUESTS.filter(r => r.status === 'Completed');
 
   return (
     <>
       <PageHeader
         title="Patient Dashboard"
-        description="Request a new ride or view your ride history."
+        description="Request equipment or view your request history."
       >
         <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Ride Request
+          New Equipment Request
         </Button>
       </PageHeader>
       <div className="grid gap-6 md:grid-cols-5">
         <div className="md:col-span-2">
-          <RideRequestForm />
+          <EquipmentRequestForm />
         </div>
         <div className="md:col-span-3 space-y-6">
-          <RideList title="Upcoming Rides" rides={upcomingRides} />
-          <RideList title="Past Rides" rides={pastRides} />
+          <RequestList title="Pending Requests" requests={pendingRequests} />
+          <RequestList title="Active Assignments" requests={activeRequests} />
+          <RequestList title="Completed Requests" requests={completedRequests} />
         </div>
       </div>
     </>

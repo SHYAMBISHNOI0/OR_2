@@ -1,26 +1,16 @@
 'use client';
 
-import Link from 'next/link';
 import React from 'react';
+import Link from 'next/link';
 import {
   Bell,
-  Car,
   CircleUser,
-  Home,
+  Hospital,
   Menu,
-  Package2,
   PieChart,
-  Stethoscope,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,12 +29,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-
-const breadcrumbRoutes = {
-  '/patient': 'Patient',
-  '/driver': 'Driver',
-  '/admin': 'Admin',
-};
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -65,8 +49,8 @@ export function AppHeader() {
               href="#"
               className="flex items-center gap-2 text-lg font-semibold"
             >
-              <Stethoscope className="h-6 w-6" />
-              <span className="sr-only">MediRoute</span>
+              <Hospital className="h-6 w-6" />
+              <span className="sr-only">Orchestrate</span>
             </Link>
             <Link
               href="/patient"
@@ -74,13 +58,6 @@ export function AppHeader() {
             >
               <Users className="h-5 w-5" />
               Patient Dashboard
-            </Link>
-            <Link
-              href="/driver"
-              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-            >
-              <Car className="h-5 w-5" />
-              Driver Dashboard
             </Link>
             <Link
               href="/admin"
