@@ -21,7 +21,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Pie, PieLabel, Cell } from 'recharts';
+import { Pie, Cell } from 'recharts';
 import { MOCK_EQUIPMENT, MOCK_REQUESTS, MOCK_USERS } from '@/lib/hospital-data';
 
 const equipmentStatusData = [
@@ -119,7 +119,7 @@ export default function AnalyticsTab() {
                   innerRadius={60}
                   strokeWidth={5}
                 >
-                   <PieLabel
+                   <RechartsPrimitive.Label
                     content={({viewBox}) => {
                       if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                         return (
@@ -173,6 +173,30 @@ export default function AnalyticsTab() {
                         {requestStatusData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
+                         <RechartsPrimitive.Label
+                            content={({viewBox}) => {
+                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                return (
+                                <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
+                                    <tspan
+                                    x={viewBox.cx}
+                                    y={viewBox.cy}
+                                    className="fill-foreground text-3xl font-bold"
+                                    >
+                                    {MOCK_REQUESTS.length.toLocaleString()}
+                                    </tspan>
+                                    <tspan
+                                    x={viewBox.cx}
+                                    y={(viewBox.cy || 0) + 24}
+                                    className="fill-muted-foreground"
+                                    >
+                                    Requests
+                                    </tspan>
+                                </text>
+                                )
+                            }
+                            }}
+                        />
                     </Pie>
                     </RechartsPrimitive.PieChart>
                 </ChartContainer>

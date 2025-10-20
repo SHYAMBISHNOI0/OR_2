@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_USERS } from '@/lib/data';
+import { MOCK_USERS } from '@/lib/hospital-data';
 import type { UserRole } from '@/lib/types';
 import {
   DropdownMenu,
@@ -30,7 +30,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const roleStyles: Record<UserRole, string> = {
   patient: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-  driver: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
   admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
 };
 
@@ -91,7 +90,6 @@ export default function UsersTab() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Approve Driver</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">Disable Account</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
