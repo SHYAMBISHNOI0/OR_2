@@ -11,32 +11,43 @@ import { Button } from '@/components/ui/button';
 import { PlayCircle, Loader } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { MOCK_REQUESTS } from '@/lib/hospital-data';
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
+import { useOrchestrate } from '@/context/orchestrate-context';
+import { EquipmentRequest } from '@/lib/types';
 
 export default function RequestsTab() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { requests, runOptimizer } = useOrchestrate();
 
-  const pendingRequests = MOCK_REQUESTS.filter((req) => req.status === 'Pending');
+  const pendingRequests = requests.filter((req) => req.status === 'Pending');
 
   const handleRunOptimizer = () => {
     setIsLoading(true);
     toast({
       title: 'Running Optimizer...',
-      description: 'Assigning pending requests to available equipment.',
+      description: 'Assigning all pending requests to available equipment.',
     });
 
-    // This is a placeholder for the actual OR-Tools integration.
-    // In a real application, this would be an API call to a backend service.
+    // This simulates the backend optimization process.
     setTimeout(() => {
+      const result = runOptimizer();
       setIsLoading(false);
-      toast({
-        title: 'Optimization Complete!',
-        description: 'Pending requests have been assigned.',
-      });
-    }, 2000);
+
+      if (result.success) {
+        toast({
+          title: 'Optimization Complete!',
+          description: `${result.assignedCount} requests have been assigned.`,
+        });
+      } else {
+        toast({
+            variant: 'destructive',
+            title: 'Optimization Failed',
+            description: result.error,
+        });
+      }
+    }, 1500);
   };
 
   return (
@@ -50,27 +61,19 @@ export default function RequestsTab() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium mb-2">Pending Requests</h3>
+          <h3 className="text-lg font-medium mb-2">Pending Requests ({pendingRequests.length})</h3>
           <div className="border rounded-lg">
-             <div className="grid grid-cols-4 gap-4 p-4 font-semibold border-b">
+             <div className="grid grid-cols-5 gap-4 p-4 font-semibold border-b">
                 <div>Patient</div>
                 <div>Requested At</div>
                 <div>Equipment</div>
                 <div>Priority</div>
+                <div>Action</div>
             </div>
             {pendingRequests.length > 0 ? (
                 <div className="divide-y">
                 {pendingRequests.map((req) => (
-                    <div key={req.id} className="grid grid-cols-4 gap-4 p-4 text-sm">
-                        <div>{req.patient.name}</div>
-                        <div>{format(req.createdAt, 'MMM d, h:mm a')}</div>
-                        <div>
-                            {req.equipmentType.map(e => <Badge key={e} variant="secondary">{e}</Badge>)}
-                        </div>
-                        <div>
-                            <Badge variant={req.priority === 'High' ? 'destructive' : 'outline'}>{req.priority}</Badge>
-                        </div>
-                    </div>
+                    <RequestRow key={req.id} req={req} />
                 ))}
                 </div>
             ) : (
@@ -84,16 +87,64 @@ export default function RequestsTab() {
           {isLoading ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Optimizing...
+              Optimizing All...
             </>
           ) : (
             <>
               <PlayCircle className="mr-2 h-4 w-4" />
-              Run Optimizer
+              Run Optimizer For All
             </>
           )}
         </Button>
       </CardFooter>
     </Card>
   );
+}
+
+function RequestRow({ req }: { req: EquipmentRequest }) {
+    const { runOptimizer } = useOrchestrate();
+    const { toast } = useToast();
+    const [isAccepting, setIsAccepting] = useState(false);
+
+    const handleAcceptRequest = (requestId: string) => {
+        setIsAccepting(true);
+        // Simulate a single request optimization
+        setTimeout(() => {
+            const result = runOptimizer(requestId);
+            if (result.success) {
+                toast({
+                    title: "Request Accepted",
+                    description: `Request ${requestId.slice(0,6)} has been assigned.`
+                });
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: "Assignment Failed",
+                    description: result.error
+                });
+            }
+            setIsAccepting(false);
+        }, 1000);
+    }
+
+
+    return (
+        <div className="grid grid-cols-5 gap-4 p-4 text-sm items-center">
+            <div>{req.patient.name}</div>
+            <div>{format(req.createdAt, 'MMM d, h:mm a')}</div>
+            <div>
+                <div className="flex flex-wrap gap-1">
+                    {req.equipmentType.map(e => <Badge key={e} variant="secondary">{e}</Badge>)}
+                </div>
+            </div>
+            <div>
+                <Badge variant={req.priority === 'High' ? 'destructive' : 'outline'}>{req.priority}</Badge>
+            </div>
+            <div>
+                <Button size="sm" onClick={() => handleAcceptRequest(req.id)} disabled={isAccepting}>
+                    {isAccepting ? <Loader className="h-4 w-4 animate-spin" /> : 'Accept'}
+                </Button>
+            </div>
+        </div>
+    )
 }

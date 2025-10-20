@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_EQUIPMENT, MOCK_USERS } from '@/lib/hospital-data';
 import type { EquipmentType } from '@/lib/types';
 import {
   DropdownMenu,
@@ -34,6 +33,7 @@ import {
   SelectValue,
 } from '../ui/select';
 import { useState } from 'react';
+import { useOrchestrate } from '@/context/orchestrate-context';
 
 const statusStyles: Record<'available' | 'occupied', string> = {
   available: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
@@ -44,9 +44,10 @@ const equipmentTypes: EquipmentType[] = ['Wheelchair', 'Bed', 'Room', 'Ambulance
 
 
 export default function EquipmentTab() {
+  const { equipment, users } = useOrchestrate();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   
-  const filteredEquipment = MOCK_EQUIPMENT.filter(e => typeFilter === 'all' || e.type === typeFilter);
+  const filteredEquipment = equipment.filter(e => typeFilter === 'all' || e.type === typeFilter);
 
   return (
     <Card>
@@ -84,7 +85,7 @@ export default function EquipmentTab() {
           </TableHeader>
           <TableBody>
             {filteredEquipment.map((item) => {
-              const assignedUser = item.assignedTo ? MOCK_USERS.find(u => u.id === item.assignedTo) : null;
+              const assignedUser = item.assignedTo ? users.find(u => u.id === item.assignedTo) : null;
               return (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.label}</TableCell>

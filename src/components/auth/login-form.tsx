@@ -5,22 +5,34 @@ import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { UserRole } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { useOrchestrate } from '@/context/orchestrate-context';
 
 export default function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const [role, setRole] = useState<UserRole>('patient');
+  const { login, users } = useOrchestrate();
+  const [email, setEmail] = useState('patient@orchestrate.com');
+  const [password, setPassword] = useState('password');
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    toast({
-      title: 'Login Successful',
-      description: `Redirecting to ${role} dashboard...`,
-    });
-    router.push(`/${role}`);
+    const user = users.find(u => u.email === email);
+
+    if (user && password === 'password') { // Simplified auth
+      login(user.id);
+      toast({
+        title: 'Login Successful',
+        description: `Welcome back, ${user.name}! Redirecting...`,
+      });
+      router.push(`/${user.role}`);
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'Invalid email or password.',
+        });
+    }
   };
 
   return (
@@ -32,43 +44,25 @@ export default function LoginForm() {
           type="email"
           placeholder="m@example.com"
           required
-          defaultValue="patient@orchestrate.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
       <div className="grid gap-2">
         <div className="flex items-center">
           <Label htmlFor="password">Password</Label>
         </div>
-        <Input id="password" type="password" required defaultValue="password" />
+        <Input 
+            id="password" 
+            type="password" 
+            required 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+        />
       </div>
-      <div className="grid gap-2">
-        <Label>Log in as</Label>
-        <RadioGroup
-          defaultValue="patient"
-          className="grid grid-cols-2 gap-4"
-          onValueChange={(value: UserRole) => setRole(value)}
-          value={role}
-        >
-          <div>
-            <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-            <Label
-              htmlFor="patient"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              Patient
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="admin" id="admin" className="peer sr-only" />
-            <Label
-              htmlFor="admin"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              Admin
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
+      <p className='text-xs text-muted-foreground'>
+        Use `admin@orchestrate.com` or `patient@orchestrate.com` with password `password`.
+      </p>
       <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
         Login
       </Button>

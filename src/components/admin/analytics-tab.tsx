@@ -1,11 +1,9 @@
 'use client';
 import {
-  Activity,
   ClipboardList,
   Users,
   CheckCircle,
   HelpCircle,
-  PieChart,
 } from 'lucide-react';
 import { StatCard } from '@/components/shared/stat-card';
 import {
@@ -22,33 +20,39 @@ import {
   ChartConfig,
 } from '@/components/ui/chart';
 import { Pie, Cell } from 'recharts';
-import { MOCK_EQUIPMENT, MOCK_REQUESTS, MOCK_USERS } from '@/lib/hospital-data';
+import * as RechartsPrimitive from 'recharts';
+import { useOrchestrate } from '@/context/orchestrate-context';
+import { useMemo } from 'react';
 
-const equipmentStatusData = [
-  { name: 'Available', value: MOCK_EQUIPMENT.filter(e => e.status === 'available').length, fill: 'var(--color-available)' },
-  { name: 'Occupied', value: MOCK_EQUIPMENT.filter(e => e.status === 'occupied').length, fill: 'var(--color-occupied)' },
-];
+export default function AnalyticsTab() {
+  const { equipment, users, requests } = useOrchestrate();
 
-const equipmentChartConfig = {
-  value: {
-    label: 'Equipment',
-  },
-  available: {
-    label: 'Available',
-    color: 'hsl(var(--chart-1))',
-  },
-  occupied: {
-    label: 'Occupied',
-    color: 'hsl(var(--chart-2))',
-  },
-} satisfies ChartConfig;
+  const equipmentStatusData = useMemo(() => [
+    { name: 'Available', value: equipment.filter(e => e.status === 'available').length, fill: 'var(--color-available)' },
+    { name: 'Occupied', value: equipment.filter(e => e.status === 'occupied').length, fill: 'var(--color-occupied)' },
+  ], [equipment]);
 
-const requestStatusData = [
-    { name: 'Pending', value: MOCK_REQUESTS.filter(e => e.status === 'Pending').length, fill: 'var(--color-pending)' },
-    { name: 'Assigned', value: MOCK_REQUESTS.filter(e => e.status === 'Assigned').length, fill: 'var(--color-assigned)' },
-    { name: 'Completed', value: MOCK_REQUESTS.filter(e => e.status === 'Completed').length, fill: 'var(--color-completed)' },
-  ];
-  
+  const requestStatusData = useMemo(() => [
+    { name: 'Pending', value: requests.filter(e => e.status === 'Pending').length, fill: 'var(--color-pending)' },
+    { name: 'Assigned', value: requests.filter(e => e.status === 'Assigned').length, fill: 'var(--color-assigned)' },
+    { name: 'Completed', value: requests.filter(e => e.status === 'Completed').length, fill: 'var(--color-completed)' },
+  ], [requests]);
+
+
+  const equipmentChartConfig = {
+    value: {
+      label: 'Equipment',
+    },
+    available: {
+      label: 'Available',
+      color: 'hsl(var(--chart-1))',
+    },
+    occupied: {
+      label: 'Occupied',
+      color: 'hsl(var(--chart-2))',
+    },
+  } satisfies ChartConfig;
+
   const requestChartConfig = {
     value: {
       label: 'Requests',
@@ -62,36 +66,35 @@ const requestStatusData = [
       color: 'hsl(var(--chart-2))',
     },
     completed: {
-        label: 'Completed',
-        color: 'hsl(var(--chart-3))',
-    }
+      label: 'Completed',
+      color: 'hsl(var(--chart-3))',
+    },
   } satisfies ChartConfig;
 
-export default function AnalyticsTab() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Equipment"
-          value={MOCK_EQUIPMENT.length.toString()}
+          value={equipment.length.toString()}
           description="All equipment items in inventory"
           icon={ClipboardList}
         />
         <StatCard
           title="Active Patients"
-          value={MOCK_USERS.filter(u => u.role === 'patient').length.toString()}
+          value={users.filter(u => u.role === 'patient').length.toString()}
           description="Patients currently registered"
           icon={Users}
         />
         <StatCard
           title="Pending Requests"
-          value={MOCK_REQUESTS.filter(r => r.status === 'Pending').length.toString()}
+          value={requests.filter(r => r.status === 'Pending').length.toString()}
           description="Equipment requests awaiting action"
           icon={HelpCircle}
         />
         <StatCard
           title="Completed Requests"
-          value={MOCK_REQUESTS.filter(r => r.status === 'Completed').length.toString()}
+          value={requests.filter(r => r.status === 'Completed').length.toString()}
           description="Fulfilled and discharged requests"
           icon={CheckCircle}
         />
@@ -112,16 +115,19 @@ export default function AnalyticsTab() {
                   cursor={false}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Pie
+                <RechartsPrimitive.Pie
                   data={equipmentStatusData}
                   dataKey="value"
                   nameKey="name"
                   innerRadius={60}
                   strokeWidth={5}
                 >
-                   <RechartsPrimitive.Label
-                    content={({viewBox}) => {
-                      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  {equipmentStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                  <RechartsPrimitive.Label
+                    content={({ viewBox }) => {
+                      if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                         return (
                           <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
                             <tspan
@@ -129,7 +135,7 @@ export default function AnalyticsTab() {
                               y={viewBox.cy}
                               className="fill-foreground text-3xl font-bold"
                             >
-                              {MOCK_EQUIPMENT.length.toLocaleString()}
+                              {equipment.length.toLocaleString()}
                             </tspan>
                             <tspan
                               x={viewBox.cx}
@@ -139,74 +145,70 @@ export default function AnalyticsTab() {
                               Items
                             </tspan>
                           </text>
-                        )
+                        );
                       }
                     }}
                   />
-                </Pie>
+                </RechartsPrimitive.Pie>
               </RechartsPrimitive.PieChart>
             </ChartContainer>
           </CardContent>
         </Card>
         <Card className="col-span-4 lg:col-span-3">
-            <CardHeader>
-                <CardTitle>Request Status</CardTitle>
-                <CardDescription>Breakdown of patient request statuses.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <ChartContainer
-                    config={requestChartConfig}
-                    className="mx-auto aspect-square max-h-[350px]"
+          <CardHeader>
+            <CardTitle>Request Status</CardTitle>
+            <CardDescription>Breakdown of patient request statuses.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={requestChartConfig}
+              className="mx-auto aspect-square max-h-[350px]"
+            >
+              <RechartsPrimitive.PieChart>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <RechartsPrimitive.Pie
+                  data={requestStatusData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  strokeWidth={5}
                 >
-                    <RechartsPrimitive.PieChart>
-                    <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                    />
-                    <Pie
-                        data={requestStatusData}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={60}
-                        strokeWidth={5}
-                    >
-                        {requestStatusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                         <RechartsPrimitive.Label
-                            content={({viewBox}) => {
-                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                return (
-                                <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                                    <tspan
-                                    x={viewBox.cx}
-                                    y={viewBox.cy}
-                                    className="fill-foreground text-3xl font-bold"
-                                    >
-                                    {MOCK_REQUESTS.length.toLocaleString()}
-                                    </tspan>
-                                    <tspan
-                                    x={viewBox.cx}
-                                    y={(viewBox.cy || 0) + 24}
-                                    className="fill-muted-foreground"
-                                    >
-                                    Requests
-                                    </tspan>
-                                </text>
-                                )
-                            }
-                            }}
-                        />
-                    </Pie>
-                    </RechartsPrimitive.PieChart>
-                </ChartContainer>
-            </CardContent>
+                  {requestStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                  <RechartsPrimitive.Label
+                    content={({ viewBox }) => {
+                      if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                        return (
+                          <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-3xl font-bold"
+                            >
+                              {requests.length.toLocaleString()}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 24}
+                              className="fill-muted-foreground"
+                            >
+                              Requests
+                            </tspan>
+                          </text>
+                        );
+                      }
+                    }}
+                  />
+                </RechartsPrimitive.Pie>
+              </RechartsPrimitive.PieChart>
+            </ChartContainer>
+          </CardContent>
         </Card>
       </div>
     </div>
   );
 }
-
-// RechartsPrimitive needs to be defined for the PieChart to work.
-// It's a workaround for the current setup.
-import * as RechartsPrimitive from 'recharts';

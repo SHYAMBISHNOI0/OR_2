@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { MOCK_REQUESTS } from '@/lib/hospital-data';
+import { useOrchestrate } from '@/context/orchestrate-context';
 
 const navItems = [
   { href: '/patient', icon: Users, label: 'Patient View' },
@@ -27,7 +27,8 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const pendingRequestsCount = MOCK_REQUESTS.filter(r => r.status === 'Pending').length;
+  const { requests } = useOrchestrate();
+  const pendingRequestsCount = requests.filter(r => r.status === 'Pending').length;
 
   return (
     <div className="hidden border-r bg-muted/40 md:block">
@@ -37,8 +38,13 @@ export function AppSidebar() {
             <Hospital className="h-6 w-6 text-primary" />
             <span className="">Orchestrate</span>
           </Link>
-          <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+          <Button variant="outline" size="icon" className="ml-auto h-8 w-8 relative">
             <Bell className="h-4 w-4" />
+            {pendingRequestsCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                    {pendingRequestsCount}
+                </span>
+            )}
             <span className="sr-only">Toggle notifications</span>
           </Button>
         </div>

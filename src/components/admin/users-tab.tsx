@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_USERS } from '@/lib/hospital-data';
 import type { UserRole } from '@/lib/types';
 import {
   DropdownMenu,
@@ -27,6 +26,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useOrchestrate } from '@/context/orchestrate-context';
 
 const roleStyles: Record<UserRole, string> = {
   patient: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
@@ -34,6 +34,7 @@ const roleStyles: Record<UserRole, string> = {
 };
 
 export default function UsersTab() {
+    const { users } = useOrchestrate();
   return (
     <Card>
       <CardHeader>
@@ -55,7 +56,7 @@ export default function UsersTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_USERS.map((user) => (
+            {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">

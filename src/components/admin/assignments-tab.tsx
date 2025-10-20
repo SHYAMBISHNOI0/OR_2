@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_ASSIGNMENTS, MOCK_EQUIPMENT, MOCK_USERS } from '@/lib/hospital-data';
+import { useOrchestrate } from '@/context/orchestrate-context';
 import { Button } from '@/components/ui/button';
 import { User, Package, Clock, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
@@ -24,8 +24,10 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function AssignmentsTab() {
   const { toast } = useToast();
+  const { assignments, users, equipment, dischargePatient } = useOrchestrate();
 
-  const handleDischarge = (patientName: string) => {
+  const handleDischarge = (patientId: string, patientName: string) => {
+    dischargePatient(patientId);
     toast({
         title: 'Patient Discharged',
         description: `${patientName} has been discharged and their assigned equipment is now available.`,
@@ -51,11 +53,11 @@ export default function AssignmentsTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_ASSIGNMENTS.map((assignment) => {
-              const patient = MOCK_USERS.find(u => u.id === assignment.patientId);
+            {assignments.length > 0 ? assignments.map((assignment) => {
+              const patient = users.find(u => u.id === assignment.patientId);
               if (!patient) return null;
               
-              const assignedEquipment = MOCK_EQUIPMENT.filter(e => assignment.equipmentIds.includes(e.id));
+              const assignedEquipment = equipment.filter(e => assignment.equipmentIds.includes(e.id));
               
               return (
               <TableRow key={assignment.id}>
@@ -85,13 +87,17 @@ export default function AssignmentsTab() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                    <Button size="sm" variant="outline" onClick={() => handleDischarge(patient.name)}>
+                    <Button size="sm" variant="outline" onClick={() => handleDischarge(patient.id, patient.name)}>
                         <LogOut className="mr-2 h-4 w-4" />
                         Discharge
                     </Button>
                 </TableCell>
               </TableRow>
-            )})}
+            )}) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center">No active assignments.</TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>

@@ -25,23 +25,21 @@ export type RequestStatus = 'Pending' | 'Assigned' | 'Completed';
 export type EquipmentRequest = {
     id: string;
     patientId: string;
-    patient: User;
+    patient: User; // Embedded for convenience
     equipmentType: EquipmentType[];
     status: RequestStatus;
     createdAt: Date;
     fulfilledBy?: string[]; // equipment IDs
     fulfilledAt?: Date;
-    timeWindow?: {
-        start: Date;
-        end: Date;
-    },
     priority?: 'High' | 'Medium' | 'Low';
     comments?: string;
 };
 
 export type Assignment = {
     id: string;
+    requestId: string;
     patientId: string;
     equipmentIds: string[];
     assignedAt: Date;
+    dischargedAt?: Date;
 };
