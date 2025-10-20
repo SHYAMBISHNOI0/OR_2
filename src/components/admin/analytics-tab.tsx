@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { summarizeRideHistory } from '@/ai/flows/summarize-ride-history';
 import { rideHistoryForSummary, MOCK_RIDES } from '@/lib/data';
 import { useEffect, useState } from 'react';
@@ -93,7 +93,7 @@ export default function AnalyticsTab() {
             <CardDescription>Monthly ride volume over the last 6 months.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={350}>
+            <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
               <BarChart data={chartData}>
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -109,7 +109,7 @@ export default function AnalyticsTab() {
                 />
                 <Bar dataKey="rides" fill="var(--color-rides)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
         <Card className="col-span-4 lg:col-span-3">
