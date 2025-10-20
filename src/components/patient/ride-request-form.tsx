@@ -25,6 +25,13 @@ import { suggestAppointmentTimes } from '@/ai/flows/suggest-appointment-times';
 import type { SuggestAppointmentTimesOutput } from '@/ai/flows/suggest-appointment-times';
 import { useToast } from '@/hooks/use-toast';
 import { MOCK_APPOINTMENT_SUGGESTIONS } from '@/lib/data';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const equipmentOptions = [
+  { id: 'wheelchair', label: 'Wheelchair' },
+  { id: 'stretcher', label: 'Stretcher/Bed' },
+  { id: 'oxygen', label: 'Oxygen Tank' },
+];
 
 export default function RideRequestForm() {
   const [date, setDate] = useState<Date>();
@@ -82,40 +89,48 @@ export default function RideRequestForm() {
       </CardHeader>
       <form onSubmit={handleFormSubmit}>
         <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="pickup">Pickup Location</Label>
-            <Input id="pickup" placeholder="Enter your address" defaultValue="123 Oak St, Ruralville" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="pickup">Pickup Location</Label>
+              <Input id="pickup" placeholder="Enter your address" defaultValue="123 Oak St, Ruralville" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dropoff">Destination</Label>
+              <Input id="dropoff" placeholder="Enter hospital or clinic" defaultValue="General Hospital, Citytown" />
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="dropoff">Destination</Label>
-            <Input id="dropoff" placeholder="Enter hospital or clinic" defaultValue="General Hospital, Citytown" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="appointment-date">Appointment Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={'outline'}
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !date && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+             <div className="grid gap-2">
+               <Label htmlFor="appointment-time">Appointment Time</Label>
+              <Input id="appointment-time" type="time" defaultValue="10:30" />
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="appointment-time">Appointment Date & Time</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !date && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'PPP') : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <Input id="appointment-time" type="time" defaultValue="10:30" />
-          </div>
+
           {suggestions && (
              <div className="grid gap-2 rounded-lg border p-4 bg-secondary/50">
                 <Label className="flex items-center gap-2 text-secondary-foreground"><Sparkles className="w-4 h-4 text-yellow-500" /> AI Suggested Times</Label>
@@ -129,11 +144,29 @@ export default function RideRequestForm() {
                 </div>
             </div>
           )}
+
           <div className="grid gap-2">
-            <Label htmlFor="needs">Special Needs (optional)</Label>
+            <Label>Necessary Equipment</Label>
+            <div className="flex items-center space-x-4">
+              {equipmentOptions.map((item) => (
+                <div key={item.id} className="flex items-center space-x-2">
+                  <Checkbox id={item.id} />
+                  <Label htmlFor={item.id} className="font-normal">{item.label}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+           <div className="grid gap-2">
+            <Label htmlFor="distance">Distance (miles)</Label>
+            <Input id="distance" type="number" placeholder="e.g., 25" />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="needs">Other Special Needs (optional)</Label>
             <Textarea
               id="needs"
-              placeholder="e.g., Wheelchair access, walker support"
+              placeholder="e.g., Walker support, service animal"
             />
           </div>
         </CardContent>

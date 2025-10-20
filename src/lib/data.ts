@@ -20,7 +20,9 @@ const rides: Ride[] = [
     appointmentTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000), // 2 hours from now
     status: 'ASSIGNED',
     driver: users[2],
-    specialNeeds: ['Wheelchair access'],
+    specialNeeds: [],
+    equipment: ['Wheelchair'],
+    distance: 25,
     createdAt: new Date(new Date().getTime() - 1 * 60 * 60 * 1000),
   },
   {
@@ -30,7 +32,8 @@ const rides: Ride[] = [
     dropoffLocation: 'City Clinic, Citytown',
     appointmentTime: new Date(new Date().getTime() + 4 * 60 * 60 * 1000), // 4 hours from now
     status: 'PENDING',
-    specialNeeds: [],
+    equipment: [],
+    distance: 15,
     createdAt: new Date(new Date().getTime() - 30 * 60 * 1000),
   },
   {
@@ -41,6 +44,8 @@ const rides: Ride[] = [
     appointmentTime: new Date(new Date().getTime() - 24 * 60 * 60 * 1000), // Yesterday
     status: 'COMPLETED',
     driver: users[2],
+    equipment: [],
+    distance: 30,
     createdAt: new Date(new Date().getTime() - 26 * 60 * 60 * 1000),
   },
   {
@@ -51,6 +56,8 @@ const rides: Ride[] = [
     appointmentTime: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
     status: 'COMPLETED',
     driver: users[4],
+    equipment: [],
+    distance: 22,
     createdAt: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000),
   },
   {
@@ -61,6 +68,8 @@ const rides: Ride[] = [
     appointmentTime: new Date(new Date().getTime() + 6 * 60 * 60 * 1000),
     status: 'PENDING',
     specialNeeds: ['Walker support'],
+    equipment: [],
+    distance: 18,
     createdAt: new Date(new Date().getTime() - 15 * 60 * 1000),
   },
 ];

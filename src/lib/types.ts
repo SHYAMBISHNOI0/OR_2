@@ -21,6 +21,8 @@ export type Ride = {
   status: RideStatus;
   driver?: User;
   specialNeeds?: string[];
+  equipment?: string[];
+  distance?: number;
   createdAt: Date;
 };
 
