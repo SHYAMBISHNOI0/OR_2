@@ -69,7 +69,7 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
       if (!patient) return prev;
 
       const newRequest: EquipmentRequest = {
-        id: `req_${prev.requests.length + 1}`,
+        id: `req_${new Date().getTime()}`,
         ...requestData,
         patient,
         status: 'Pending',
@@ -124,7 +124,7 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
                 const existingAssignmentIndex = newAssignments.findIndex(a => a.requestId === request.id);
                 if (existingAssignmentIndex === -1) {
                      newAssignments.push({
-                        id: `asg_${prev.assignments.length + assignedCount + 1}`,
+                        id: `asg_${new Date().getTime()}_${Math.random()}`,
                         requestId: request.id,
                         patientId: request.patientId,
                         equipmentIds: assignedEquipmentIds,
