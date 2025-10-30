@@ -22,7 +22,6 @@ const equipmentOptions: { id: EquipmentType, label: string }[] = [
   { id: 'Ambulance', label: 'Ambulance Transport' },
   { id: 'Nurse', label: 'Nurse Assistance' },
   { id: 'Doctor', label: 'Doctor Consultation' },
-  { id: 'Room', label: 'Private Room'},
 ];
 
 type EquipmentRequestFormProps = {
