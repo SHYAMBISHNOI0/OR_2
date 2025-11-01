@@ -21,6 +21,10 @@ import { User, Package, Clock, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
+const consultancyTypeClasses = {
+    online: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+    offline: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+}
 
 export default function AssignmentsTab() {
   const { toast } = useToast();
@@ -47,6 +51,7 @@ export default function AssignmentsTab() {
           <TableHeader>
             <TableRow>
               <TableHead>Patient</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Assigned Equipment</TableHead>
               <TableHead>Assigned At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -69,6 +74,11 @@ export default function AssignmentsTab() {
                   <div className="text-sm text-muted-foreground ml-6">
                     {patient.email}
                   </div>
+                </TableCell>
+                <TableCell>
+                    <Badge variant="outline" className={`${consultancyTypeClasses[assignment.consultancyType]} capitalize`}>
+                        {assignment.consultancyType}
+                    </Badge>
                 </TableCell>
                 <TableCell>
                     <div className='flex flex-wrap gap-1'>
@@ -95,7 +105,7 @@ export default function AssignmentsTab() {
               </TableRow>
             )}) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">No active assignments.</TableCell>
+                <TableCell colSpan={5} className="text-center">No active assignments.</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -16,6 +16,11 @@ import { format } from 'date-fns';
 import { useOrchestrate } from '@/context/orchestrate-context';
 import { EquipmentRequest } from '@/lib/types';
 
+const consultancyTypeClasses = {
+    online: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+    offline: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+}
+
 export default function RequestsTab() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -30,7 +35,6 @@ export default function RequestsTab() {
       description: 'Assigning all pending requests to available equipment.',
     });
 
-    // This simulates the backend optimization process.
     setTimeout(() => {
       const result = runOptimizer();
       setIsLoading(false);
@@ -63,9 +67,10 @@ export default function RequestsTab() {
         <div>
           <h3 className="text-lg font-medium mb-2">Pending Requests ({pendingRequests.length})</h3>
           <div className="border rounded-lg">
-             <div className="grid grid-cols-6 gap-4 p-4 font-semibold border-b bg-muted/50">
+             <div className="grid grid-cols-7 gap-4 p-4 font-semibold border-b bg-muted/50">
                 <div className="col-span-2">Patient</div>
-                <div>Requested At</div>
+                <div>Type</div>
+                <div>Distance</div>
                 <div>Equipment</div>
                 <div>Priority</div>
                 <div>Action</div>
@@ -108,7 +113,6 @@ function RequestRow({ req }: { req: EquipmentRequest }) {
 
     const handleAcceptRequest = (requestId: string) => {
         setIsAccepting(true);
-        // Simulate a single request optimization
         setTimeout(() => {
             const result = runOptimizer(requestId);
             if (result.success) {
@@ -129,12 +133,19 @@ function RequestRow({ req }: { req: EquipmentRequest }) {
 
 
     return (
-        <div className="grid grid-cols-6 gap-4 p-4 text-sm items-center">
+        <div className="grid grid-cols-7 gap-4 p-4 text-sm items-center">
             <div className="col-span-2">
                 <div>{req.patient.name}</div>
-                <div className="text-xs text-muted-foreground">{req.distanceFromHospital} km away</div>
+                <div className="text-xs text-muted-foreground">{format(req.createdAt, 'MMM d, h:mm a')}</div>
             </div>
-            <div>{format(req.createdAt, 'MMM d, h:mm a')}</div>
+             <div>
+                <Badge variant="outline" className={`${consultancyTypeClasses[req.consultancyType]} capitalize`}>
+                    {req.consultancyType}
+                </Badge>
+            </div>
+            <div>
+                {req.consultancyType === 'offline' ? `${req.distanceFromHospital} km` : 'N/A'}
+            </div>
             <div>
                 <div className="flex flex-wrap gap-1">
                     {req.equipmentType.map(e => <Badge key={e} variant="secondary">{e}</Badge>)}

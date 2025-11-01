@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { getInitialState } from '@/lib/hospital-data';
-import type { User, Equipment, EquipmentRequest, Assignment } from '@/lib/types';
+import type { User, Equipment, EquipmentRequest, Assignment, ConsultancyType } from '@/lib/types';
 
 interface OrchestrateState {
   users: User[];
@@ -28,10 +28,9 @@ const OrchestrateContext = createContext<
 export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<OrchestrateState>(() => {
     const initialState = getInitialState();
-    // For demo purposes, automatically log in the admin user.
     return {
       ...initialState,
-      currentUser: null, // Start with no user logged in
+      currentUser: null,
     };
   });
 
@@ -100,33 +99,32 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
             const request = newRequests[requestIndex];
             const assignedEquipmentIds: string[] = [];
             let canFulfill = true;
-            let tempEquipmentState = [...newEquipment]; // Create a temporary state for this request's assignments
+            let tempEquipmentState = [...newEquipment]; 
 
             for (const type of request.equipmentType) {
                 const availableItemIndex = tempEquipmentState.findIndex(e => e.type === type && e.status === 'available');
                 if (availableItemIndex !== -1) {
                     const assignedId = tempEquipmentState[availableItemIndex].id;
                     assignedEquipmentIds.push(assignedId);
-                    // Temporarily mark as occupied to avoid re-assignment in the same run for the same request
                     tempEquipmentState[availableItemIndex] = { ...tempEquipmentState[availableItemIndex], status: 'occupied', assignedTo: request.patientId };
                 } else {
                     canFulfill = false;
                     optimizationError = `Not enough ${type} available for request ${request.id.slice(0, 6)}.`;
-                    // No need to revert since we are using a temporary state `tempEquipmentState`
                     break;
                 }
             }
 
             if (canFulfill) {
-                newEquipment = tempEquipmentState; // Commit the changes if successful
+                newEquipment = tempEquipmentState;
                 newRequests[requestIndex] = { ...request, status: 'Assigned', fulfilledBy: assignedEquipmentIds, fulfilledAt: new Date() };
                 
                 const existingAssignmentIndex = newAssignments.findIndex(a => a.requestId === request.id);
                 if (existingAssignmentIndex === -1) {
                      newAssignments.push({
-                        id: `asg_${new Date().getTime()}_${Math.random()}`,
+                        id: `asg_${new Date().getTime()}_${request.id}`,
                         requestId: request.id,
                         patientId: request.patientId,
+                        consultancyType: request.consultancyType,
                         equipmentIds: assignedEquipmentIds,
                         assignedAt: new Date(),
                     });
@@ -150,31 +148,26 @@ export const OrchestrateProvider = ({ children }: { children: ReactNode }) => {
 
   const dischargePatient = (patientId: string) => {
     setState((prev) => {
-      // Find all active assignments for the patient and mark them as discharged
+      const activeAssignmentsForPatient = prev.assignments.filter(a => a.patientId === patientId && !a.dischargedAt);
+
+      if (activeAssignmentsForPatient.length === 0) return prev;
+      
       const updatedAssignments = prev.assignments.map(a => 
-        a.patientId === patientId && !a.dischargedAt ? { ...a, dischargedAt: new Date() } : a
+        activeAssignmentsForPatient.some(active => active.id === a.id) ? { ...a, dischargedAt: new Date() } : a
       );
 
-      // Get the IDs of equipment to be freed
-      const equipmentIdsToFree = prev.assignments
-        .filter(a => a.patientId === patientId && !a.dischargedAt)
-        .flatMap(a => a.equipmentIds);
+      const equipmentIdsToFree = activeAssignmentsForPatient.flatMap(a => a.equipmentIds);
         
-      // Free up the equipment
       const newEquipment = prev.equipment.map(e => 
         equipmentIdsToFree.includes(e.id) ? { ...e, status: 'available', assignedTo: null } : e
       );
 
-      // Mark original requests as completed
-      const requestIdsToComplete = prev.assignments
-          .filter(a => a.patientId === patientId && !a.dischargedAt)
-          .map(a => a.requestId);
+      const requestIdsToComplete = activeAssignmentsForPatient.map(a => a.requestId);
 
       const newRequests = prev.requests.map(r => 
         requestIdsToComplete.includes(r.id) ? { ...r, status: 'Completed' } : r
       );
 
-      // Filter out discharged assignments from the main assignments list being displayed
       const activeAssignments = updatedAssignments.filter(a => !a.dischargedAt);
 
       return {

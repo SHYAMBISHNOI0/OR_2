@@ -21,11 +21,13 @@ export type Equipment = {
 };
 
 export type RequestStatus = 'Pending' | 'Assigned' | 'Completed';
+export type ConsultancyType = 'online' | 'offline';
 
 export type EquipmentRequest = {
     id: string;
     patientId: string;
     patient: User; // Embedded for convenience
+    consultancyType: ConsultancyType;
     equipmentType: EquipmentType[];
     status: RequestStatus;
     createdAt: Date;
@@ -40,6 +42,7 @@ export type Assignment = {
     id: string;
     requestId: string;
     patientId: string;
+    consultancyType: ConsultancyType;
     equipmentIds: string[];
     assignedAt: Date;
     dischargedAt?: Date;

@@ -17,15 +17,17 @@ for (let i = 1; i <= 50; i++) {
     equipment.push({ id: `wheelchair${i}`, label: `Wheelchair ${i}`, type: 'Wheelchair', status: 'available', assignedTo: null });
 }
 
-// Rooms with Beds
+// Rooms with Beds - 5 rooms, 10 beds each
 for (let roomNum = 1; roomNum <= 5; roomNum++) {
     for (let bedNum = 1; bedNum <= 10; bedNum++) {
-        equipment.push({ id: `room${roomNum}_bed${bedNum}`, label: `Room ${roomNum} - Bed ${bedNum}`, type: 'Bed', status: 'available', assignedTo: null });
+        // Create a bed
+        equipment.push({ id: `room${roomNum}_bed${bedNum}`, label: `Bed ${bedNum} (Room ${roomNum})`, type: 'Bed', status: 'available', assignedTo: null });
     }
 }
-
-// Standalone Beds (if any, adjust as needed) - let's assume all beds are in rooms for now.
-// For a total of 50 beds, we have 5 rooms * 10 beds/room = 50 beds.
+// This structure creates 50 beds. We'll also seed 5 "Room" items separately if a room itself is requestable.
+for (let i = 1; i <= 5; i++) {
+    equipment.push({ id: `room${i}`, label: `Room ${i}`, type: 'Room', status: 'available', assignedTo: null });
+}
 
 // Ambulances
 for (let i = 1; i <= 10; i++) {
@@ -48,6 +50,7 @@ const requests: EquipmentRequest[] = [
         id: 'req_1',
         patientId: 'usr_2',
         patient: users.find(u => u.id === 'usr_2')!,
+        consultancyType: 'offline',
         equipmentType: ['Wheelchair', 'Nurse'],
         status: 'Pending',
         createdAt: new Date(new Date().getTime() - 2 * 60 * 60 * 1000), // 2 hours ago
@@ -58,6 +61,7 @@ const requests: EquipmentRequest[] = [
         id: 'req_2',
         patientId: 'usr_3',
         patient: users.find(u => u.id === 'usr_3')!,
+        consultancyType: 'offline',
         equipmentType: ['Bed'],
         status: 'Pending',
         createdAt: new Date(new Date().getTime() - 1 * 60 * 60 * 1000), // 1 hour ago
@@ -68,6 +72,7 @@ const requests: EquipmentRequest[] = [
         id: 'req_3',
         patientId: 'usr_4',
         patient: users.find(u => u.id === 'usr_4')!,
+        consultancyType: 'offline',
         equipmentType: ['Ambulance'],
         status: 'Assigned',
         createdAt: new Date(new Date().getTime() - 5 * 60 * 60 * 1000), // 5 hours ago
@@ -80,13 +85,14 @@ const requests: EquipmentRequest[] = [
         id: 'req_4',
         patientId: 'usr_2',
         patient: users.find(u => u.id === 'usr_2')!,
+        consultancyType: 'online',
         equipmentType: ['Doctor'],
         status: 'Completed',
         createdAt: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
         fulfilledBy: ['doctor1'],
         fulfilledAt: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000 + 1 * 60 * 60 * 1000),
         priority: 'Low',
-        distanceFromHospital: 15.2,
+        distanceFromHospital: 0,
     }
 ];
 
@@ -99,13 +105,6 @@ if (assignedReq && assignedReq.fulfilledBy) {
         equip.assignedTo = assignedReq.patientId;
     }
 }
-const completedReq = requests.find(r => r.id === 'req_4');
-if (completedReq && completedReq.fulfilledBy) {
-    // Note: In a real system, 'doctor1' might become available again after a completed task.
-    // For this mock data, we'll assume it's still occupied to show variety, but a real implementation would free it up.
-    const equip = equipment.find(e => e.id === completedReq.fulfilledBy![0]);
-    // if (equip) equip.status = 'occupied';
-}
 
 
 // --- INITIAL ASSIGNMENTS ---
@@ -114,6 +113,7 @@ const assignments: Assignment[] = [
         id: 'asg_1',
         requestId: 'req_3',
         patientId: 'usr_4',
+        consultancyType: 'offline',
         equipmentIds: ['ambulance3'],
         assignedAt: new Date(new Date().getTime() - 4 * 60 * 60 * 1000)
     }
